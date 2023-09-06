@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window* window = SDL_CreateWindow(
-        "Screensaver",
+        "Screensaver Paralelo",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
         640, 480, SDL_WINDOW_SHOWN
     );
@@ -72,21 +72,24 @@ int main(int argc, char** argv) {
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-        for (Circle& circle : circles) {
+        // Actualizar la posición de los círculos en paralelo
+        #pragma omp parallel for
+        for (int i = 0; i < numCircles; ++i) {
             // Actualizar la posición del círculo
-            circle.x += circle.vx;
-            circle.y += circle.vy;
+            circles[i].x += circles[i].vx;
+            circles[i].y += circles[i].vy;
 
             // Verificar si el círculo ha alcanzado el límite de la ventana
-            if (circle.x - circle.radius < 0 || circle.x + circle.radius > 640) {
-                circle.vx = -circle.vx; // Invertir la velocidad en el eje x
+            if (circles[i].x - circles[i].radius < 0 || circles[i].x + circles[i].radius > 640) {
+                circles[i].vx = -circles[i].vx; // Invertir la velocidad en el eje x
             }
-            if (circle.y - circle.radius < 0 || circle.y + circle.radius > 480) {
-                circle.vy = -circle.vy; // Invertir la velocidad en el eje y
+            if (circles[i].y - circles[i].radius < 0 || circles[i].y + circles[i].radius > 480) {
+                circles[i].vy = -circles[i].vy; // Invertir la velocidad en el eje y
             }
-
         }
 
+        // Detectar colisiones en paralelo
+        #pragma omp parallel for
         for (int i = 0; i < numCircles; ++i) {
             for (int j = i + 1; j < numCircles; ++j) {
                 int dx = circles[i].x - circles[j].x;
