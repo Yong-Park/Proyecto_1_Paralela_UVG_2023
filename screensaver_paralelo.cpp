@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
     }
 
     int numCircles = atoi(argv[1]);
+    int numMovement  = atoi(argv[2]);
     
-
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window* window = SDL_CreateWindow(
@@ -42,35 +42,39 @@ int main(int argc, char** argv) {
     );
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Establecer el color de dibujo en rojo
     
     srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
+    unsigned int seeds[numCircles];
+    for (int i = 0; i < numCircles; ++i) {
+        seeds[i] = time(NULL) ^ i; // Initialize the seeds with different values
+    }
 
     // Inicializar los círculos
     std::vector<Circle> circles(numCircles);
+    #pragma omp parallel for
     for (int i = 0; i < numCircles; ++i) {
-        circles[i].x = rand() % 640; // Generar un número aleatorio entre 0 y 640
-        circles[i].y = rand() % 480; // Generar un número aleatorio entre 0 y 480
-        circles[i].vx = rand() % 21 - 10; // Generar un número aleatorio entre -10 y 10
-        circles[i].vy = rand() % 21 - 10; // Generar un número aleatorio entre -10 y 10
+        circles[i].x = rand_r(&seeds[i]) % 640; // Generar un número aleatorio entre 0 y 640
+        circles[i].y = rand_r(&seeds[i]) % 480; // Generar un número aleatorio entre 0 y 480
+        circles[i].vx = rand_r(&seeds[i]) % 21 - 10; // Generar un número aleatorio entre -10 y 10
+        circles[i].vy = rand_r(&seeds[i]) % 21 - 10; // Generar un número aleatorio entre -10 y 10
         circles[i].radius = 10; // El radio del círculo
-        circles[i].color = { rand() % 256, rand() % 256, rand() % 256, 255 };
+        circles[i].color = { rand_r(&seeds[i]) % 256, rand_r(&seeds[i]) % 256, rand_r(&seeds[i]) % 255, 255 };
     }
 
-    const int FPS = 60;
-    const int frameDelay = 1000 / FPS;
-    Uint32 frameStart;
+    Uint64 frameStart;
     int frameTime;
-    int frameCount = 0;
+    int frameCount = 0; //contador para que pueda desplegar despues de cada tiempo
+    Uint64 totalFrameTime = 0;
+    int totalFrames = 0;
+    int moveCounter = 0;
+    bool shouldStop = false;
 
     // Bucle principal
     while (true) {
-        frameStart = SDL_GetTicks();
-        // Limpiar la pantalla
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        frameStart = SDL_GetPerformanceCounter(); //comenzar a el contador para los fps
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // fondo de color blanco
+        SDL_RenderClear(renderer); // realizar limpieza de la pantalla.
 
         // Actualizar la posición de los círculos en paralelo
         #pragma omp parallel for
@@ -128,20 +132,34 @@ int main(int argc, char** argv) {
 
         SDL_RenderPresent(renderer); // Presentar los cambios en el renderer
 
-        frameTime = SDL_GetTicks() - frameStart;
+        Uint64 end = SDL_GetPerformanceCounter();
+        // Calcular los frames
+        float elapsedSeconds = (end - frameStart) / (float)SDL_GetPerformanceFrequency();
+        float fps = 1.0f / elapsedSeconds;
 
-        if (frameDelay > frameTime) {
-            SDL_Delay(frameDelay - frameTime);
-        }
-
-        // Calcular y mostrar los FPS cada 60 cuadros
+        // Mostrar los FPS cada 60 cuadros
         if (frameCount++ % 60 == 0) {
-            float elapsedSeconds = frameTime / 1000.0f; // Convertir milisegundos a segundos
-            float fps = 1.0f / elapsedSeconds; // Calcular los FPS
             printf("FPS: %.2f\n", fps); // Imprimir los FPS en la terminal
         }
 
+        totalFrameTime += end - frameStart;
+        totalFrames++;
+
+        if (moveCounter >= numMovement) {
+            shouldStop = true;
+            break;
+        }
+    
+        if (shouldStop) {
+            break;
+        }
+        moveCounter++;
+
     }
+
+    float averageFrameTime = totalFrameTime / (float)totalFrames / SDL_GetPerformanceFrequency();
+    float averageFPS = 1.0f / averageFrameTime;
+    printf("FPS promedio: %.2f\n", averageFPS);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
