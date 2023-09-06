@@ -25,16 +25,26 @@ void FillCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_
 
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        printf("Uso: %s <numero de circulos>\n", argv[0]);
+    if (argc < 3) {
+        printf("Uso: %s <numero de circulos> <numero de movimientos>\n", argv[0]);
         return 1;
     }
 
     int numCircles = atoi(argv[1]);
     int numMovement  = atoi(argv[2]);
+
+    if (numCircles <= 0) {
+        printf("El numero de circulos debe ser mayor a cero.\n");
+        return 1;
+    }
+
+    if (numMovement <= 0) {
+        printf("El numero de movimientos debe ser mayor a cero.\n");
+        return 1;
+    }
     
     SDL_Init(SDL_INIT_VIDEO);
-
+    // Creacion del screen
     SDL_Window* window = SDL_CreateWindow(
         "Screensaver Secuencial",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
@@ -106,7 +116,7 @@ int main(int argc, char** argv) {
                     float angle1 = (float)(rand() % 360) * M_PI / 180.0f;
                     float angle2 = (float)(rand() % 360) * M_PI / 180.0f;
 
-                    // Calcular las nuevas velocidades
+                    // Calcular las nuevas velocidades segun su nuevo angulo a dirigirse
                     circles[i].vx = cos(angle1) * 10;
                     circles[i].vy = sin(angle1) * 10;
                     circles[j].vx = cos(angle2) * 10;
@@ -149,7 +159,7 @@ int main(int argc, char** argv) {
     }
     float averageFrameTime = totalFrameTime / (float)totalFrames / SDL_GetPerformanceFrequency();
     float averageFPS = 1.0f / averageFrameTime;
-    printf("FPS promedio: %.2f\n", averageFPS);
+    printf("FPS promedio secuencial: %.2f\n", averageFPS);
 
 
     SDL_DestroyRenderer(renderer);
