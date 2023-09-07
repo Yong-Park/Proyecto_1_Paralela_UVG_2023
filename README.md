@@ -14,4 +14,4 @@
 - g++ -o screensaver_paralelo screensaver_paralelo.cpp $(sdl2-config--cflags--libs)
 
   ### correr el programa
-  - ./screensaver_secuencial <numero de circulos> <numero de iteraciones>
+  - ./screensaver_secuencial <numero_de_circulos> <numero_de_iteraciones>
