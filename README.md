@@ -12,7 +12,7 @@
 ### Compilación del código
 ```g++ -o screensaver_secuencial screensaver_secuencial.cpp $(sdl2-config--cflags--libs)```
 
-```g++ -o screensaver_paralelo screensaver_paralelo.cpp $(sdl2-config--cflags--libs)```
+```g++ -o screensaver_paralelo screensaver_paralelo.cpp $(sdl2-config--cflags--libs) -fopenmp```
 
   ### Ejecutar el programa compilado
   ```./screensaver_secuencial <numero_de_circulos> <numero_de_iteraciones>```
