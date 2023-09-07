@@ -1,3 +1,14 @@
+/*
+Proyecto 1
+Computacion Paralela
+
+Integrantes:
+- Yong Park
+- Oscar Lopez
+- Pedro Arriola
+*/
+
+
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <time.h>
@@ -157,6 +168,8 @@ int main(int argc, char** argv) {
         moveCounter++;
 
     }
+
+    // Realizar la impresion del promedio de FPS secuenciales
     float averageFrameTime = totalFrameTime / (float)totalFrames / SDL_GetPerformanceFrequency();
     float averageFPS = 1.0f / averageFrameTime;
     printf("FPS promedio secuencial: %.2f\n", averageFPS);
