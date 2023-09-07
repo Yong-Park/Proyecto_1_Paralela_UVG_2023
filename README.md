@@ -4,8 +4,8 @@
 
 ### Integrantes:
 - Yong Bum Park
-- Oscar Fernando Lopez Barrios
-- Pedro Pablo Arriola Jimenez
+- Oscar Fernando López Barrios
+- Pedro Pablo Arriola Jiménez
 
 ### Instalacion de la libreria en Linux
 ```sudo apt install libsdl2-dev```
